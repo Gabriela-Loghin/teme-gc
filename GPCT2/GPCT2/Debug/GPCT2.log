@@ -1,0 +1,6 @@
+﻿  t02p1.cpp
+C:\Users\Q\Desktop\GC\gpc\GPCT2\GPCT2\t02p1.cpp(245,24): warning C4101: 'xmin': unreferenced local variable
+C:\Users\Q\Desktop\GC\gpc\GPCT2\GPCT2\t02p1.cpp(245,18): warning C4101: 'ymax': unreferenced local variable
+C:\Users\Q\Desktop\GC\gpc\GPCT2\GPCT2\t02p1.cpp(245,30): warning C4101: 'ymin': unreferenced local variable
+C:\Users\Q\Desktop\GC\gpc\GPCT2\GPCT2\t02p1.cpp(245,12): warning C4101: 'xmax': unreferenced local variable
+  GPCT2.vcxproj -> C:\Users\Q\Desktop\GC\gpc\GPCT2\Debug\GPCT2.exe
