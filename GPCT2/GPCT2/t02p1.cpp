@@ -100,7 +100,8 @@ void Display2() {
    glEnd();
 }
 
-//////////////////////////////////////////////  FUNCTIA CU DISTANTA  ///////////////////////////////////////////////////////////
+
+/// EXERCITIUL 1 ///
 
 class Punct {
 public:
@@ -115,11 +116,11 @@ public:
 //            =1       , x=0;
 double Distanta(double x) {
     int i;
-    double d1=0.5;
-    double d2=0.2;
+    double d1;
+    double d2;
     double min;
     for (i = 0; i <= 100; i++) {
-        if ((i < x) and (i + 1 > x) and (x - i < 1) and (x - i > 0) and ((i + 1) - x) < 1 and ((i + 1) - x) > 0) {
+        if ((i <= x) and ((i + 1) >= x) and (x - i <= 1) and (x - i >= 0) and ((i + 1) - x) <= 1 and ((i + 1) - x) >= 0) {
             d1 = x - i;
             d2 = (i + 1) - x;
         }
@@ -168,29 +169,20 @@ std::vector<Punct> get_set_vertex() {
     double ymin = 0;
     double xmin = 0;
     double xmax = 10;
-    double ratia = 1;
+    double ratia = 0.05;
     double f;
     std::vector<double> maximum;
     std::vector<Punct> puncte;
 
+    for (x = 0+ratia; x <= 75; x = x + ratia) {
 
-    for (x = 0; x <= 100; x = x + ratia) {
-        if (x == 0) {
-            f = 1;
-            maximum = get_maximum(x);
-            xv = x / maximum[0] ;
-            yv = f / maximum[1];
-            Punct new_point = Punct(xv, yv);
-            puncte.push_back(new_point);
-        }
-        else {
-            f = Distanta(x) / x;
-            maximum = get_maximum(x);
-            xv = x / maximum[0];
-            yv = f / maximum[1];
-            Punct new_point = Punct(xv, yv);
-            puncte.push_back(new_point);
-        }
+        f = Distanta(x) / x;
+        maximum = get_maximum(x);
+        xv = x / maximum[0];
+        yv = f / maximum[1];
+        Punct new_point = Punct(xv, yv);
+        puncte.push_back(new_point);
+        
     }
     return puncte;
 }
@@ -205,12 +197,11 @@ void Display3() {
     }
     glEnd();
 }
-///////////////////////////////////// MELCUL LUI PASCAL///////////////////////////////////////////////////////////
 
-//melcul lui Pascal-concoida cercului :
+/// EXERCITIUL 2 - melcul lui Pascal-concoida cercului :
 //  x=2*(a*cost+b)*cost,y=2*(a*cost+b)*sint,t->(-pi,pi)
 
-std::vector<double> get_min_max(double a, double b, double ratia,double t ) {
+std::vector<double> get_min_max(double a, double b, double t) {
     double pi = 4 * atan(1.0);
     double xmax;
     double ymax;
@@ -251,11 +242,11 @@ void Display4() {
   
     for (t = -pi + ratia; t < pi; t += ratia) {
         double x, y;
-        std::vector<double> max = get_min_max(0.3, 0.2, 0.05,t);
+        std::vector<double> max = get_min_max(0.3,0.2,t);
         x = 2 * (a * cos(t) + b) * cos(t);
         x = x / (max[0]*2);
         y = 2 * (a * cos(t) + b) * sin(t);
-        y = y / max[1];
+        y = y /(max[1]/2);
         Punct punct =  Punct(x, y);
         puncte.push_back(punct);
         
@@ -269,7 +260,172 @@ void Display4() {
  
 }
 
-////////////////////////////////////// TRISECTOAREA LUI LONGSCAMPS ///////////////////////////////////////////////
+/// EXERCITIUL 3 - TRISECTOAREA LUI LONGCHAMPS 
+
+
+std::vector<double> get_max_trisectoare() {
+    double pi = atan(1) * 4;
+    double ratia = 0.025;
+    double x, y;
+    double xmax, ymax, xmin, ymin;
+    std::vector<double> maximum;
+    
+    xmin =  xmax = (0.2 / (4 * cos(-pi/2+ratia) * cos(-pi/2+ratia) - 3));
+    ymin = ymax = (0.2 * tan(-pi / 2 + ratia)) / (4 * cos(-pi / 2 + ratia) * cos(-pi / 2 + ratia) - 3);
+    for (double t = -pi/2 + ratia; t < pi/2; t=t+ ratia) {
+        x = (0.2 / (4 * cos(t) * cos(t) - 3));
+        y = (0.2 * tan(t)) / (4 * cos(t) * cos(t) - 3);
+
+        xmax = (xmax < x) ? x : xmax;
+        xmin = (xmin > x) ? x : xmin;
+        ymax = (ymax < y) ? y : ymax;
+        ymin = (ymin > y) ? y : ymin;
+    }
+
+    xmax = (fabs(xmax) > fabs(xmin)) ? fabs(xmax) : fabs(xmin);
+    ymax = (fabs(ymax) > fabs(ymin)) ? fabs(ymax) : fabs(ymin);
+
+  
+    maximum.push_back(xmax);
+    maximum.push_back(ymax);
+
+    return maximum;
+}
+
+void Display5() {
+    double t;
+    double xmax, ymax;
+    double const pi = acos(-1);
+    double ratia = 0.025;
+   
+    std::vector < double> maxx = get_max_trisectoare();
+
+    xmax = maxx[0] / 3.5;
+    ymax = maxx[1] / 3.5;
+
+    glColor3f(0.1, 0.1, 1);
+
+    glBegin(GL_LINE_STRIP);
+    double x1, y1, x2, y2;
+    double x_vf, y_vf;
+    int h((-pi / 6 - ratia + pi / 2) / ratia);
+    double l(-pi / 2 + ratia * (h + 1));
+
+    x1 = (0.2/(4*cos(l) *cos(l)-3) / xmax) * 2;
+    y1 = (0.2*tan(l) / (4 * cos(l) * cos(l) - 3)) / ymax;
+
+    x2 = (0.2 / (4 * cos((-pi / 2 + ratia) * cos(-pi / 2 + ratia) - 3) / xmax )) *2;
+    y2 = (0.2 * tan(- pi / 2 + ratia) / (4 * cos(-pi / 2 + ratia) * cos(-pi / 2 + ratia) - 3)) / ymax;
+
+    x_vf = x1;
+    y_vf = y2;
+
+    glVertex2f(x1, y1);
+    glVertex2f(x1, y2);
+    glVertex2f(x2, y2);
+
+    std::vector<std::pair<double, double>> poz_triunghi;
+
+    for (t = -pi / 2 + ratia; t < -pi / 6; t += ratia) {
+        if ((t != pi / 6) and (t != -pi / 6)) {
+            x1 = (0.2 / (4 * cos(t) * cos(t) - 3) / xmax) * 2;
+            y1 = (0.2 * tan(t) / (4 * cos(t) * cos(t) - 3)) / ymax;
+
+            for (double r = t; r < t + ratia && r < -pi / 6 - ratia; r += ratia/9 ) {
+                poz_triunghi.emplace_back((0.2 / (4 * cos(r) * cos(r) - 3) / xmax) * 2,
+                    (0.2 * tan(r) / (4 * cos(r) * cos(r) - 3)) / ymax);
+            }
+            glVertex2f(x1, y1);
+        }
+
+    }
+    glEnd();
+    glColor3f(1, 0.1, 0.1); // rosu
+    glPolygonMode(GL_FRONT, GL_FILL);
+    glBegin(GL_TRIANGLES);
+
+    for (int i = 0; i < poz_triunghi.size() - 1; i += 3) {
+        x1 = poz_triunghi[i].first;
+        y1 = poz_triunghi[i].second;
+
+        x2 = poz_triunghi[i + 1].first;
+        y2 = poz_triunghi[i + 1].second;
+
+        glVertex2f(x1, y1);
+        glVertex2f(x_vf, y_vf);
+        glVertex2f(x2, y2);
+    }
+    glEnd();
+}
+
+
+std::vector<double> get_max_cicloida() {
+    double pi = atan(1) * 4;
+    double ratia = 0.05;
+    double x, y;
+    double xmax, ymax, xmin, ymin;
+    std::vector<double> maximum;
+    double a = 0.1;
+    double b = 0.2;
+
+
+    xmin = -100000;
+    xmax = 1000000;
+    ymin = -0.1;
+    ymax = 0.1;
+
+    for (double t = -pi / 2 + ratia; t < pi / 2; t = t + ratia) {
+        x = a * t - b * sin(t);
+        y = a - b * cos(t);
+
+        xmax = (xmax < x) ? x : xmax;
+        xmin = (xmin > x) ? x : xmin;
+        ymax = (ymax < y) ? y : ymax;
+        ymin = (ymin > y) ? y : ymin;
+    }
+
+    xmax = (fabs(xmax) > fabs(xmin)) ? fabs(xmax) : fabs(xmin);
+    ymax = (fabs(ymax) > fabs(ymin)) ? fabs(ymax) : fabs(ymin);
+
+
+    maximum.push_back(xmax);
+    maximum.push_back(ymax);
+
+    return maximum;
+}
+
+std::vector<Punct> get_puncts_cicloida() {
+    double ratia = 0.05;
+    double x,y,t;
+    double a = 0.1;
+    double b = 0.2;
+   
+    std::vector<Punct> puncte;
+
+    for (t = -10000; t <= 10000; t = t + ratia)
+    {
+        x = a * t - b * sin(t);
+        y = a - b * cos(t);
+        Punct punct = Punct(x, y);
+        puncte.push_back(punct);
+ 
+    }
+    return puncte;
+ }
+
+void Display6() {
+  
+    std::vector<Punct> puncte = get_puncts_cicloida();
+
+    glColor3f(1, 0.1, 0.1);
+    glBegin(GL_LINE_STRIP);
+    for (Punct p : puncte) {
+        glVertex2f(p.x, p.y);
+    }
+    glEnd;
+}
+
+
 
 void Init(void) {
 
@@ -297,6 +453,12 @@ void Display(void) {
        break;
    case '4':
        Display4();
+       break;
+   case '5':
+       Display5();
+       break;
+   case '7':
+       Display6();
        break;
    default:
       break;
