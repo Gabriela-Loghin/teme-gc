@@ -312,7 +312,7 @@ std::vector < std::pair<double, double>> vf_triunghi(double ratia) {
                 varf_triunghi.emplace_back((0.2 / (4 * cos(r) * cos(r) - 3) / xmax) * 2,
                     (0.2 * tan(r) / (4 * cos(r) * cos(r) - 3)) / ymax);
             }
-          //  glVertex2f(x, y);
+       
         }
     }
     return varf_triunghi;
@@ -326,8 +326,8 @@ void get_margine() {
     double xmax, ymax;
     double x1, y1, x2, y2, x3, y3;
 
-    int h((-pi / 6 - ratia + pi / 2) / ratia);
-    double l(-pi / 2 + ratia * (h + 1));
+    int inaltime=((-pi / 6 - ratia + pi / 2) / ratia);
+    double latime=(-pi / 2 + ratia * (inaltime + 1));
 
     std::vector < std::pair<double, double>> triunghi = vf_triunghi(ratia);
     std::vector < double> maxx = get_max_trisectoare();
@@ -338,8 +338,8 @@ void get_margine() {
     glColor3f(0.1, 0.1, 1);
     glBegin(GL_LINE_STRIP);
 
-    x1 = (0.2 / (4 * cos(l) * cos(l) - 3) / xmax) * 2;
-    y1 = (0.2 * tan(l) / (4 * cos(l) * cos(l) - 3)) / ymax;
+    x1 = (0.2 / (4 * cos(latime) * cos(latime) - 3) / xmax) * 2;
+    y1 = (0.2 * tan(latime) / (4 * cos(latime) * cos(latime) - 3)) / ymax;
 
     x2 = (0.2 / (4 * cos((-pi / 2 + ratia) * cos(-pi / 2 + ratia) - 3) / xmax)) * 2;
     y2 = (0.2 * tan(-pi / 2 + ratia) / (4 * cos(-pi / 2 + ratia) * cos(-pi / 2 + ratia) - 3)) / ymax;
@@ -363,8 +363,8 @@ void  get_interior_image() {
     double x1, y1, x2, y2, x_aux, y_aux,x_vf,y_vf;
     double ratia = 0.025;
     double pi = 4 * atan(1);
-    int h = ((-pi / 6 - ratia + pi / 2) / ratia);
-    double l = (-pi / 2 + ratia * (h + 1));
+    int inaltime = ((-pi / 6 - ratia + pi / 2) / ratia);
+    double latime= (-pi / 2 + ratia * (inaltime + 1));
     std::vector < std::pair<double, double>> triunghi = vf_triunghi(ratia);
 
     std::vector < double> maxx = get_max_trisectoare();
@@ -375,7 +375,7 @@ void  get_interior_image() {
     glPolygonMode(GL_FRONT, GL_FILL);
     glBegin(GL_TRIANGLES);
 
-    x_aux = (0.2 / (4 * cos(l) * cos(l) - 3) / xmax) * 2;
+    x_aux = (0.2 / (4 * cos(latime) * cos(latime) - 3) / xmax) * 2;
     y_aux = (0.2 * tan(-pi / 2 + ratia) / (4 * cos(-pi / 2 + ratia) * cos(-pi / 2 + ratia) - 3)) / ymax;
     x_vf = x_aux;
     y_vf = y_aux;
