@@ -1,0 +1,3 @@
+﻿  t5p3.cpp
+C:\Users\zbant\source\repos\Tema3GC\Tema3GC\t5p3.cpp(619): warning C4717: 'sierpinskitriangle::sierpinski_triangle': recursive on all control paths, function will cause runtime stack overflow
+  Tema3GC.vcxproj -> C:\Users\zbant\source\repos\Tema3GC\Debug\Tema3GC.exe
