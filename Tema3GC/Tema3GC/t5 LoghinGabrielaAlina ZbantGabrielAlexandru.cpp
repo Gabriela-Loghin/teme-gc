@@ -8,10 +8,74 @@
 #pragma warning(disable : 4996)
 // dimensiunea ferestrei in pixeli
 #define dim 500
+#define RX_MB 0.01
+#define RY_MB 0.01
+#define NRITER_JF 5000
+#define MODMAX_JF 10000000
 
 unsigned char prevKey;
 int nivel = 0;
 
+
+class CComplex {
+public:
+    CComplex() : re(0.0), im(0.0) {}
+    CComplex(double re1, double im1) : re(re1 * 1.0), im(im1 * 1.0) {}
+    CComplex(const CComplex& c) : re(c.re), im(c.im) {}
+    ~CComplex() {}
+
+    CComplex& operator=(const CComplex& c)
+    {
+        re = c.re;
+        im = c.im;
+        return *this;
+    }
+
+    double getRe() { return re; }
+    void setRe(double re1) { re = re1; }
+
+    double getIm() { return im; }
+    void setIm(double im1) { im = im1; }
+
+    double getModul() { return sqrt(re * re + im * im); }
+
+    int operator==(CComplex& c1)
+    {
+        return ((re == c1.re) && (im == c1.im));
+    }
+
+    CComplex pow2()
+    {
+        CComplex rez;
+        rez.re = powl(re * 1.0, 2) - powl(im * 1.0, 2);
+        rez.im = 2.0 * re * im;
+        return rez;
+    }
+
+    friend CComplex operator+(const CComplex& c1, const CComplex& c2);
+    friend CComplex operator*(CComplex& c1, CComplex& c2);
+
+    void print(FILE* f)
+    {
+        fprintf(f, "%.20f%+.20f i", re, im);
+    }
+
+private:
+    double re, im;
+};
+
+CComplex operator+(const CComplex& c1, const CComplex& c2)
+{
+    CComplex rez(c1.re + c2.re, c1.im + c2.im);
+    return rez;
+}
+
+CComplex operator*(CComplex& c1, CComplex& c2)
+{
+    CComplex rez(c1.re * c2.re - c1.im * c2.im,
+        c1.re * c2.im + c1.im * c2.re);
+    return rez;
+}
 
 class C2coord
 {
@@ -584,65 +648,196 @@ void Display5() {
 
 
 
-class sierpinskitriangle
+class frunzadafin
 {
 public:
-    void sierpinski_triangle(double lungime, int nivel, CPunct& p, CVector& v, int d) {
+    void frunza_dafin(double lungime, CPunct& point, CVector& vector, int poz_unghi, int nivel) {
+        int a = 60;;
+        int b = 30;
         if (nivel <= 0) return;
 
         if (nivel == 1) {
+            CVector copy = vector;
 
-            CVector copy = v;
-            int a;
-            int b;
-
-            if (d == 1) {
-                a = 60;
-                b = -30;
+            if (poz_unghi == 1) {
+                a = a;
+                b = -b;
             }
             else {
-                a = -60;
-                b = +30 + 180;
+                a = -a;
+                b = b + 180;
             }
-            v.rotatie(b);
 
-            v.rotatie(a);
-            v.deseneaza(p, lungime);
-            p = v.getDest(p, lungime); 
-            v.rotatie(a);
-            v.deseneaza(p, lungime);
-            p = v.getDest(p, lungime);
-            v.rotatie(a);
-            v.deseneaza(p, lungime);
-            p = v.getDest(p, lungime); 
-            v = copy;
+            vector.rotatie(b);
+            vector.rotatie(a);
+
+            vector.deseneaza(point, lungime);
+            point = vector.getDest(point, lungime);
+            vector.rotatie(a);
+            vector.deseneaza(point, lungime);
+            point = vector.getDest(point, lungime);
+            vector.rotatie(a);
+            vector.deseneaza(point, lungime);
+            point = vector.getDest(point, lungime);
+            vector = copy;
 
             return;
         }
-        CVector old = v;
-        v.rotatie(-d * 60);
-        sierpinski_triangle(lungime * 0.55, nivel - 1, p, v, -d);
-        v.rotatie(d * 60);
-        sierpinski_triangle(lungime * 0.55, nivel - 1, p, v, d);
+        CVector old = vector;
+        vector.rotatie(-poz_unghi * 60);
+        frunza_dafin(lungime * 0.55, point, vector, -poz_unghi, nivel - 1);
 
-        v.rotatie(d * 60);
-        sierpinski_triangle(lungime * 0.55, nivel - 1, p, v, -d);
-        v = old;
+        vector.rotatie(poz_unghi * 60);
+        frunza_dafin(lungime * 0.55, point, vector, poz_unghi, nivel - 1);
+
+        vector.rotatie(poz_unghi * 60);
+        frunza_dafin(lungime * 0.55, point, vector, -poz_unghi, nivel - 1);
+        vector = old;
     }
 
     void afisare(double lungime, int nivel) {
-        CVector v(1.0, 0.0);
-        CPunct p(-0.8, -0.8);
+        CVector vector(1.0, 0.0);
+        CPunct point(-0.8, -0.8);
 
-        sierpinski_triangle(lungime, nivel, p, v, 1);
+        frunza_dafin(lungime, point, vector, 1, nivel);
     }
 };
 
 void Display6() {
-    sierpinskitriangle st;
+    frunzadafin st;
     st.afisare(0.5, nivel);
     nivel++;
 }
+
+class Mandelbrot {
+public:
+    Mandelbrot()
+    {
+        // m.c se initializeaza implicit cu 0+0i
+
+        m.nriter = NRITER_JF;
+    }
+
+
+    ~Mandelbrot() {}
+
+    void setnriter(int v) { assert(v <= NRITER_JF); m.nriter = v; }
+    int getnriter() { return m.nriter; }
+
+    int isIn(CComplex& c) {
+
+        int rez = 0;
+        // tablou in care vor fi memorate valorile procesului iterativ z_n+1 = z_n * z_n + c
+        CComplex z0, z1;
+        for (int i = 1; i < m.nriter; ++i)
+        {
+            z1 = z0 * z0 + c;
+            if (z1.getModul() > 2.0)
+            {
+                return i;
+            }
+            z0 = z1;
+        }
+        return 0;
+    }
+    void display(double xmin, double ymin, double xmax, double ymax)
+    {
+        glPushMatrix();
+        glLoadIdentity();
+        //glTranslated((xmin + xmax) * 1.0 / (xmin - xmax), (ymin + ymax)  * 1.0 / (ymin - ymax), 0);
+        glScaled(2 / (xmax - xmin), 2 / (ymax - ymin), 1);
+        glBegin(GL_POINTS);
+        int v[30];
+        for (int i = 0; i < 30; i++)
+            v[i] = 0;
+        for (double x = xmin; x <= xmax; x += RX_MB)
+        {
+            for (double y = ymin; y <= ymax; y += RY_MB)
+            {
+                CComplex z(x, y);
+                int r = isIn(z);
+                v[r]++;
+                if (r == 0)
+                {
+                    glColor3f(1.0, r / m.nriter, r / m.nriter);
+                    glVertex3d(x, y, 0);
+                }
+                else
+                {
+                    switch (r)
+                    {
+                    case 1:
+                        glColor4f(1.0f, 1.0f, 0.0f, 0.0f);
+                        break;
+                    case 2:
+                        glColor4f(0.0f, 1.0f, 1.0f, 1.0f);
+                        break;
+                    case 3:
+                        glColor3f(0.5f, 1.0f, 1.0f);
+                        break;
+                    case 4:
+                        glColor3f(0.0f, 1.0f, 0.0f);
+                        break;
+                    case 5:
+                        glColor3f(0.0f, 0.5f, 1.0f);
+                        break;
+                    case 6:
+                        glColor3f(0.1f, 0.1f, 0.1f);
+                        break;
+                    case 7:
+                        glColor3f(0.1f, 0.1f, 0.0f);
+                        break;
+                    case 8:
+                        glColor3f(0.0f, 0.1f, 0.0f);
+                        break;
+                    case 9:
+                        glColor3f(2.0f, 0.5f, 1.0f);
+                        break;
+                    case 10:
+                        glColor3f(1.0f, 0.0f, 1.0f);
+                        break;
+                    case 11:
+                        glColor4f(1.0f, 1.0f, 0.0f, 0.0f);
+                        break;
+                    case 12:
+                        glColor4f(0.0f, 1.0f, 1.0f, 1.0f);
+                        break;
+                    case 13:
+                        glColor3f(1.0f, 0.5f, 0.0f);
+                        break;
+                    case 14:
+                        glColor3f(0.0f, 0.5f, 1.0f);
+                        break;
+                    case 15:
+                        glColor3f(0.5f, 1.0f, 1.0f);
+                        break;
+                    default:
+                        glColor3f(0.0f, 0.5f, 0.5f);
+                        break;
+                    }
+                    glVertex3d(x, y, 0);
+                }
+            }
+        }
+        for (int i = 0; i < 30; i++)
+            printf("%i %i\n", i, v[i]);
+        fprintf(stdout, "STOP\n");
+        glEnd();
+
+        glPopMatrix();
+    }
+private:
+    struct SDate {
+        int nriter;
+    } m;
+};
+
+void Display7() {
+    Mandelbrot mb;
+    mb.setnriter(30);
+    mb.display(-2, -2, 2, 2);
+}
+
 
 void Init(void) {
 
@@ -687,6 +882,10 @@ void Display(void)
     case '6':
         glClear(GL_COLOR_BUFFER_BIT);
         Display6();
+        break;
+    case '7':
+        glClear(GL_COLOR_BUFFER_BIT);
+        Display7();
         break;
     default:
       break;
